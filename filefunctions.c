@@ -8,29 +8,19 @@
 
 /**************************************************************
  * * Entry:
- * *  resultChangeArray - The array containing the amount of each denomination
- * *  numberOfElements - The result array size
- * *  minNumberOfCoins - The minimum number of coins
+ * *  resultArray - The array to output
+ * *  resultArraySize - The result array size
  * *  inputFileName - The input file name
  * *
  * * Exit:
  * *  n/a
  * *
  * * Purpose:
- * *  Outputs the results to [inputFileName]change.txt
+ * *  Outputs the results to [inputFileName].tour
  * *
  * ***************************************************************/
-void outputResultToFile(int *resultChangeArray, int numberOfElements, int minNumberOfCoins, char *inputFileName)
+void outputResultToFile(int *resultArray, int resultArraySize, char *inputFileName)
 {
-	// char inputFileNameNoExt[MAX_INPUT_LINE_SIZE];
-	// strncpy(inputFileNameNoExt, inputFileName, MAX_INPUT_LINE_SIZE - 1);
-
-	// Remove the extension from the input file name
-	// if (strstr(inputfilename, ".txt") != null) {
-	// 	int inputfilenamelen = strlen(inputfilenamenoext);
-	// 	inputfilenamenoext[inputfilenamelen - 4] = 0;
-	// }
-
 	// Create the output file name
 	char outputFileName[MAX_INPUT_LINE_SIZE - 1];
 	strncpy(outputFileName, inputFileName, MAX_INPUT_LINE_SIZE - 1);
@@ -38,24 +28,11 @@ void outputResultToFile(int *resultChangeArray, int numberOfElements, int minNum
 
 	FILE *outputFile = fopen(outputFileName, "a");
 
-	// Output the array containing the change amount of each denomination
-	fprintf(outputFile, "%c", '[');
 	int i;
-	for (i = 0; i < numberOfElements; ++i)
+	for (i = 0; i < resultArraySize; ++i)
 	{
-		// Do not write comma if first element
-		if (i != 0)
-		{
-			fprintf(outputFile, "%s", ", ");
-		}
-		fprintf(outputFile, "%d", resultChangeArray[i]);
+		fprintf(outputFile, "%d\n", resultArray[i]);
 	}
-	fprintf(outputFile, "%c", ']');
-	fprintf(outputFile, "%c", '\n');
-
-	// Output the minimum number of coins needed
-	fprintf(outputFile, "%d", minNumberOfCoins);
-	fprintf(outputFile, "%c", '\n');
 
 	fclose(outputFile);
 }
@@ -369,5 +346,27 @@ void display2DIntArray(int **intArray, int rows, int columns)
 			printf("%d ", intArray[i][j]);
 		}
 		printf("\n");
+	}
+}
+
+void pushIntResult(int value, int *arrayToPushTo, int arraySize)
+{
+	int i;
+	for (i = 0; i < arraySize; i++)
+	{
+		if (arrayToPushTo[i] == -1)
+		{
+			arrayToPushTo[i] = value;
+			break;
+		}
+	}
+}
+
+void resetArrays(int *array, int arrLen)
+{
+	int i;
+	for (i = 0; i < arrLen; i++)
+	{
+		array[i] = -1;
 	}
 }

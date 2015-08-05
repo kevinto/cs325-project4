@@ -90,39 +90,23 @@ int main(int argc, char *argv[])
  * ***************************************************************/
 void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
 {
-	// display2DIntArray(cityArray, numberOfCities, 3);
+	// Create a dynamic array to hold the results, numberOfCities+1
+	int resultArraySize = numberOfCities + 1;
+	int *resultArray = (int *)malloc(resultArraySize * sizeof(int));
+	resetArrays(resultArray, resultArraySize);
 
-	// Create and initialize the array to hold denomination amounts
-	// int i;
-	// int *resultChangeArray = malloc(numberOfElements * sizeof(int));
-	// for (i = 0; i < numberOfElements; i++)
-	// {
-	// 	resultChangeArray[i] = 0;
-	// }
+	// TODO: Write algorithm using the push mechanism to keep track of the cities. 
+	// Note: The optimal TSP path should be the first line of the output file, 
+	//       so we might need to create an intermediate dynamic array to hold the 
+	//    	 optimum path.
+	int testint1 = 1;
+	pushIntResult(testint1, resultArray, resultArraySize);
 
-	// int minNumberOfCoins = 0;
-	// for (i = numberOfElements - 1; i >= 0; i--)
-	// {
-	// 	while (inputArray[i] <= changeAmount)
-	// 	{
-	// 		changeAmount -= inputArray[i];
-	// 		resultChangeArray[i]++;
-	// 		minNumberOfCoins++;
+	// For debugging
+	// displayIntArray(resultArray, resultArraySize);
 
-	// 		if (changeAmount <= 0)
-	// 		{
-	// 			break;
-	// 		}
-	// 	}
+	// Create a method to output the resulting array to a file
+	outputResultToFile(resultArray, resultArraySize, inputFileName);
 
-	// 	if (changeAmount <= 0)
-	// 	{
-	// 		break;
-	// 	}
-	// }
-
-	// // // Output the result to results file
-	// outputResultToFile(resultChangeArray, numberOfElements, minNumberOfCoins, inputFileName);
-
-	// free(resultChangeArray);
+	free(resultArray);
 }
