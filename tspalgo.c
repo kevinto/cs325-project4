@@ -1,7 +1,7 @@
 /**************************************************************
  * *  Filename: tspalgo.c
- * *  Coded by: Group 2 
- * *  Purpose - This file implements the algorithm for the TSP 
+ * *  Coded by: Group 2
+ * *  Purpose - This file implements the algorithm for the TSP
  * *			problem.
  * *
  * ***************************************************************/
@@ -11,7 +11,7 @@
 #include <limits.h>
 #include "filefunctions.h"
 
-void executeAlgorithm(int *inputArray, int numberOfElements, int changeAmount, char *inputFileName);
+void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName);
 
 // Program entry point
 int main(int argc, char *argv[])
@@ -31,37 +31,43 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-		int i;
-		int numberOfElements = 0;
+		int i, j;
 		int changeAmount = 0;
 		int lineContainingArray = 0;
 		int lineContainingChangeAmount = 0;
 		char *inputFileName = argv[1];
-
 		int numberOfLines = numberOfLinesInFile(inputFileName);
-		int numberOfProblemsToProcess = numberOfLines / 2;
+		int numberOfElements = getNumberOfElementsInLine(inputFileName, 0);
 
-		// Run the algorithm problem in the input file. A problem
-		//  consists of the array of denominations and the amount
-		//  of change.
-		for (i = 0; i < numberOfProblemsToProcess; i++)
+		// Init dynamic array to hold the values from the test file. The format
+		// of the dynamic array is cityArray[row][column]. A row contains coordinates
+		// for one city. There are three columns:
+		// first column = city identifier (this is an integer)
+		// second column = x coordinate (integer)
+		// third column = y coordinate (integer)
+		int **cityArray = (int **)malloc(numberOfLines * sizeof(int *));
+		for (i = 0; i < numberOfLines; i++)
 		{
-			lineContainingArray = i + i;
-			numberOfElements = getNumberOfElementsInLine(inputFileName, lineContainingArray);
-
-			int *inputArray = malloc(numberOfElements * sizeof(int));
-
-			// Fill the input array with the numbers from line i in the file
-			fillIntArray(inputFileName, lineContainingArray, inputArray, numberOfElements);
-
-			lineContainingChangeAmount = (2 * i) + 1;
-			changeAmount = getChangeAmount(inputFileName, lineContainingChangeAmount);
-
-			executeAlgorithm(inputArray, numberOfElements, changeAmount, inputFileName);
-
-			// Cleanup dynamically allocated strings
-			free(inputArray);
+			cityArray[i] = (int *)malloc(numberOfElements * sizeof(int));
 		}
+
+		// Put test file values into the array
+		for (i = 0; i <  numberOfLines; i++)
+		{
+			fillIntArray(inputFileName, i, cityArray[i], numberOfElements);
+		}
+
+		// For debug only
+		// display2DIntArray(cityArray, numberOfLines, numberOfElements);
+
+		executeAlgorithm(cityArray, numberOfLines, inputFileName);
+
+		// Free dynamic arrays
+		for (i = 0; i < numberOfLines; i++)
+		{
+			free(cityArray[i]);
+		}
+		free(cityArray);
 	}
 
 	return 0;
@@ -78,49 +84,45 @@ int main(int argc, char *argv[])
  * *  n/a
  * *
  * * Purpose:
- * *  Executes the algorithm
+ * *  Executes the algorithm. This method assumes each row in cityArray
+ * *  has three columns.
  * *
  * ***************************************************************/
-void executeAlgorithm(int *inputArray, int numberOfElements, int changeAmount, char *inputFileName)
+void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
 {
-	// Greedy algorithm pseudocode
-	// For each element in the inputArray starting from the last element to the first
-	// while the current element <= changeAmount
-	// subtract the current element value from the changeAmount
-	// increment the current denomination in the change denomination array
-	// increment the minNumberOfCoins
+	// display2DIntArray(cityArray, numberOfCities, 3);
 
 	// Create and initialize the array to hold denomination amounts
-	int i;
-	int *resultChangeArray = malloc(numberOfElements * sizeof(int));
-	for (i = 0; i < numberOfElements; i++)
-	{
-		resultChangeArray[i] = 0;
-	}
+	// int i;
+	// int *resultChangeArray = malloc(numberOfElements * sizeof(int));
+	// for (i = 0; i < numberOfElements; i++)
+	// {
+	// 	resultChangeArray[i] = 0;
+	// }
 
-	int minNumberOfCoins = 0;
-	for (i = numberOfElements - 1; i >= 0; i--)
-	{
-		while (inputArray[i] <= changeAmount)
-		{
-			changeAmount -= inputArray[i];
-			resultChangeArray[i]++;
-			minNumberOfCoins++;
+	// int minNumberOfCoins = 0;
+	// for (i = numberOfElements - 1; i >= 0; i--)
+	// {
+	// 	while (inputArray[i] <= changeAmount)
+	// 	{
+	// 		changeAmount -= inputArray[i];
+	// 		resultChangeArray[i]++;
+	// 		minNumberOfCoins++;
 
-			if (changeAmount <= 0)
-			{
-				break;
-			}
-		}
+	// 		if (changeAmount <= 0)
+	// 		{
+	// 			break;
+	// 		}
+	// 	}
 
-		if (changeAmount <= 0)
-		{
-			break;
-		}
-	}
+	// 	if (changeAmount <= 0)
+	// 	{
+	// 		break;
+	// 	}
+	// }
 
-	// // Output the result to results file
-	outputResultToFile(resultChangeArray, numberOfElements, minNumberOfCoins, inputFileName);
+	// // // Output the result to results file
+	// outputResultToFile(resultChangeArray, numberOfElements, minNumberOfCoins, inputFileName);
 
-	free(resultChangeArray);
+	// free(resultChangeArray);
 }

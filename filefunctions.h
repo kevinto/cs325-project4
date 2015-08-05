@@ -11,6 +11,7 @@ void displayFile();
 int numberOfLinesInFile(char *fileName);
 void initializeIntArray(int *intArray, int numberofElements);
 void displayIntArray(int *intArray, int numberOfElements);
+void display2DIntArray(int **intArray, int rows, int columns);
 void fillIntArray(char *inputFileName, int inputLineNumber, int *inputArray, int numberOfElements);
 int getNumberOfElementsInLine(char *inputFileName, int inputLineNumber);
 void RemoveNewLineAndAddNullTerm(char *stringValue);

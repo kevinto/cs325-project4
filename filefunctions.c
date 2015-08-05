@@ -67,11 +67,12 @@ void fillIntArray(char *inputFileName, int inputLineNumber, int *inputArray, int
 
 	char stringValue[MAX_INPUT_LINE_SIZE];
 	getLineFromFile(inputFileName, inputLineNumber, stringValue);
+	// printf("the line is: %s\n", stringValue);
 
 	// Establish string and get the first token
 	int currentNumber;
 	int currentInputArrayIdx = 0;
-	char *token = strtok(stringValue, ",[]");
+	char *token = strtok(stringValue, " ");
 	while ( token != 0 )
 	{
 		sscanf(token, "%d", &currentNumber);
@@ -84,9 +85,10 @@ void fillIntArray(char *inputFileName, int inputLineNumber, int *inputArray, int
 		}
 
 		inputArray[currentInputArrayIdx++] = currentNumber;
+		// printf("currentInputArrayIdx: %d\n", currentInputArrayIdx);
 
 		/* Get next token: */
-		token = strtok(0, ",[]");
+		token = strtok(0, " ");
 	}
 }
 
@@ -202,7 +204,7 @@ void getLineFromFile(char *inputFileName, int inputLineNumber, char *stringValue
 
 int countElementsInString(char *stringValue)
 {
-	int numberOfCommas = 0;
+	int numberOfSpaces = 0;
 	int i;
 
 	int stringLen = strlen(stringValue);
@@ -213,19 +215,19 @@ int countElementsInString(char *stringValue)
 			break;
 		}
 
-		if (stringValue[i] == ',')
+		if (stringValue[i] == ' ')
 		{
-			numberOfCommas++;
+			numberOfSpaces++;
 		}
 	}
 
-	if (numberOfCommas == 0)
+	if (numberOfSpaces == 0)
 	{
 		return 1;
 	}
 	else
 	{
-		return numberOfCommas + 1;
+		return numberOfSpaces + 1;
 	}
 }
 
@@ -355,4 +357,17 @@ int fileExists(char *fileName)
 void testfunction()
 {
 	printf("hello from ff\n");
+}
+
+void display2DIntArray(int **intArray, int rows, int columns)
+{
+	int i, j;
+	for (i = 0; i <  rows; i++)
+	{
+		for (j = 0; j < columns; j++)
+		{
+			printf("%d ", intArray[i][j]);
+		}
+		printf("\n");
+	}
 }
