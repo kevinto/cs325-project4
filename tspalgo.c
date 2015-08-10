@@ -109,7 +109,7 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 	int i;
 
 //********************************************************************************
-//Matt's portion	
+//Matt's portion
 	// Init dynamic array to hold the values from the test file. The format
 	// of the dynamic array is an array of struct city. Each struct in the
 	// array contains:
@@ -127,44 +127,37 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 		//fillCities(inputFileName, i, citiesArray, numberOfElements);
 	}
 	//debug purposes only
-	displayCityArray(cities, numberOfCities);
+	// displayCityArray(cities, numberOfCities);
 //********************************************************************************
 
-	
+
 	// Create a dynamic array to hold the results, numberOfCities+1
 	int resultArraySize = numberOfCities + 1;
 	int *resultArray = (int *)malloc(resultArraySize * sizeof(int));
 	resetArrays(resultArray, resultArraySize);
 
-	// TODO: Write algorithm using the push mechanism to keep track of the cities.
-	// Note: The optimal TSP path should be the first line of the output file,
-	//       so we might need to create an intermediate dynamic array to hold the
-	//    	 optimum path.
-	// int testint1 = 1;
-	// pushIntResult(testint1, resultArray, resultArraySize);
-
 //!!!!!
 	int num_of_cities = numberOfCities;
 	int num_of_edges = num_of_cities * (num_of_cities) / 2;
 
-/*	//INITIALIZE DUMMY DATA UNTIL MATT'S PROVIDES DATA
-	struct city cities[num_of_cities];
-	cities[0].id = 0;
-	cities[0].x = 200;
-	cities[0].y = 800;
+	/*	//INITIALIZE DUMMY DATA UNTIL MATT'S PROVIDES DATA
+		struct city cities[num_of_cities];
+		cities[0].id = 0;
+		cities[0].x = 200;
+		cities[0].y = 800;
 
-	cities[1].id = 1;
-	cities[1].x = 3600;
-	cities[1].y = 2300;
+		cities[1].id = 1;
+		cities[1].x = 3600;
+		cities[1].y = 2300;
 
-	cities[2].id = 2;
-	cities[2].x = 3100;
-	cities[2].y = 3300;
+		cities[2].id = 2;
+		cities[2].x = 3100;
+		cities[2].y = 3300;
 
-	cities[3].id = 3;
-	cities[3].x = 4700;
-	cities[3].y = 5750;
-*/
+		cities[3].id = 3;
+		cities[3].x = 4700;
+		cities[3].y = 5750;
+	*/
 
 	//Struct that stores 2 cities and the weight of their edge
 	struct edge *city_edge;
@@ -181,8 +174,8 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 
 	//Find MST by using Prim's algorithm
 	double total_weight = find_MST(num_of_cities, city_edge, mst_adj_matrix, num_of_edges);
-	printf("MST weight = %.0f\n", total_weight);
-	PrintAdjMatrix(mst_adj_matrix, num_of_cities); // For debugging
+	// printf("MST weight = %.0f\n", total_weight);
+	// PrintAdjMatrix(mst_adj_matrix, num_of_cities); // For debugging
 
 	//Init the construct that keeps track of the DFS path
 	int *dfsPath = (int *)malloc(num_of_edges * sizeof(int));
@@ -190,11 +183,12 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 
 	//Run DFS, keeping track of the path and the total length
 	int *dfsVisited = (int *)malloc(num_of_cities * sizeof(int));
+	for (int i = 0; i < num_of_cities; ++i)
+	{
+		dfsVisited[i] = 0;
+	}
 	DFS(0, dfsVisited, mst_adj_matrix, num_of_cities, dfsPath, num_of_edges);
 	addToPath(dfsPath, num_of_edges, 0); // Add the last city to travel to
-	for (i = 0; i < num_of_edges; i++) {
-		printf("path: %d\n", dfsPath[i]);
-	}
 
 	// Write out the approximate optimal path length
 	int finalTspPathLength = calculatePathLength(dfsPath, num_of_edges, mst_adj_matrix, num_of_cities, city_edge);
@@ -267,12 +261,12 @@ int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, i
 		}
 		currentTotalEdgeWeight += currentEdgeWeight;
 
-		printf("curr w: %d\n", currentEdgeWeight);
+		// printf("curr w: %d\n", currentEdgeWeight);
 	}
 
 	// Find the edge for the second to last node in the path to the last node in the path
 	currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, dfsPath[numberOfNodesInPath - 2], dfsPath[numberOfNodesInPath - 1]);
-	printf("curr w: %d\n", currentEdgeWeight);
+	// printf("curr w: %d\n", currentEdgeWeight);
 
 	currentTotalEdgeWeight += currentEdgeWeight;
 
@@ -304,7 +298,7 @@ int getWeightFromEdgeList(struct edge *edgeList, int num_of_edges, int startingN
 
 void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *dfsPath, int pathSize)
 {
-	int j;
+	int j, i;
 	visited[sourceNode] = 1;
 	addToPath(dfsPath, pathSize, sourceNode);
 	// printf("path: %d\n", sourceNode);
@@ -440,7 +434,7 @@ void find_distance(struct city *cities, int num_of_cities, struct edge *city_edg
 	qsort(city_edge, num_of_edges, sizeof(struct edge), cmp_weights);
 
 	// TEST SORT WORKED
-	for (i = 0; i < num_of_edges; i++) {
-		printf("Edge between %d and %d, W: %.0f\n", city_edge[i].i_id, city_edge[i].j_id, city_edge[i].weight);
-	}
+	// for (i = 0; i < num_of_edges; i++) {
+	// 	printf("Edge between %d and %d, W: %.0f\n", city_edge[i].i_id, city_edge[i].j_id, city_edge[i].weight);
+	// }
 }
