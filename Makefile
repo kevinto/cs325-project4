@@ -3,7 +3,7 @@
 # # Description: A makefile for CS325 Project 4.
 # #########################################################
 
-CXX = gcc -std=c99 
+CXX = gcc -std=c99 -lm
 
 SRC1 = tspalgo.c
 SRC4 = filefunctions.c

@@ -26,11 +26,16 @@ void outputResultToFile(int *resultArray, int resultArraySize, char *inputFileNa
 	strncpy(outputFileName, inputFileName, MAX_INPUT_LINE_SIZE - 1);
 	strncat(outputFileName, ".tour", MAX_INPUT_LINE_SIZE - 1);
 
-	FILE *outputFile = fopen(outputFileName, "a");
+	FILE *outputFile = fopen(outputFileName, "w");
 
 	int i;
 	for (i = 0; i < resultArraySize; ++i)
 	{
+		if (resultArray[i] == -1)
+		{
+			break;
+		}
+		
 		fprintf(outputFile, "%d\n", resultArray[i]);
 	}
 
