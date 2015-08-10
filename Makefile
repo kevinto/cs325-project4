@@ -17,7 +17,7 @@ HEADERS = ${HEADER1}
 all: program1
 
 program1: ${SRC1}
-	${CXX} ${SRC1} ${SRC4} ${HEADERS} -o ${PROG1}  
+	${CXX} ${SRC1} -lm ${SRC4} ${HEADERS} -o ${PROG1}  
 
 #program4: ${SRC5}
 #	${CXX} ${SRC5} ${SRC4} ${HEADERS} -o ${PROG4}  

@@ -74,6 +74,51 @@ void fillIntArray(char *inputFileName, int inputLineNumber, int *inputArray, int
 	}
 }
 
+void fillCities(char *inputFileName, int inputLineNumber, struct city *inputCity, int numberOfElements)
+{
+	// printf("you are on line: %d\n", inputLineNumber);
+	//initializeIntArray(inputArray, numberOfElements);
+
+	char stringValue[MAX_INPUT_LINE_SIZE];
+	getLineFromFile(inputFileName, inputLineNumber, stringValue);
+	// printf("the line is: %s\n", stringValue);
+
+	// Establish string and get the first token
+	int currentNumber;
+	int count = 0;
+	char *token = strtok(stringValue, " ");
+	while ( token != 0 )
+	{
+		sscanf(token, "%d", &currentNumber);
+		
+//		printf("count = %d; currentNumber = %d\n", count, currentNumber);
+		
+		if (count >= numberOfElements)
+		{
+			// printf("inputLineNumber: %d\n", inputLineNumber);
+			// printf("Error (fillIntArray): Accessing out of bounds index in array\n");
+			break;
+		}
+
+		if (count == 0) {
+			inputCity->id = currentNumber;
+			
+		}
+		else if (count == 1) {
+			inputCity->x = currentNumber;
+		}
+		else {//(count == 2)
+			inputCity->y = currentNumber;
+		}
+		
+		count++;
+
+		/* Get next token: */
+		token = strtok(0, " ");
+	}
+//	printf("\n\n");
+}
+
 int getChangeAmount(char *inputFileName, int inputLineNumber)
 {
 	int changeAmount = 0;
@@ -351,6 +396,15 @@ void display2DIntArray(int **intArray, int rows, int columns)
 			printf("%d ", intArray[i][j]);
 		}
 		printf("\n");
+	}
+}
+
+void displayCityArray(struct city *cities, int rows)
+{
+	int i;
+	for (i = 0; i <  rows; i++)
+	{
+		printf("%d %d %d\n", cities[i].id, cities[i].x, cities[i].y);
 	}
 }
 
