@@ -23,13 +23,14 @@ struct edge {
 
 //FUNCTION DECLARATIONS
 void find_distance(struct city cities[], int num_of_cities, struct edge *city_edge, int num_of_edges);
-// double find_MST(int num_of_cities, struct edge *city_edge, struct edge *mst_edge, int num_of_edges);
 double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix, int num_of_edges);
 int cmp_weights(const void *a, const void *b);
 void PrintAdjMatrix(int **mst_adj_matrix, int num_of_cities);
 void setArrToNegOne(int *array, int arraySize);
 void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *dfsPath, int pathSize);
 void addToPath(int *dfsPath, int pathSize, int sourceNode);
+int calculatePathLength(int *dfsPath, int num_of_edges, int **mst_adj_matrix, int num_of_cities, struct edge *edgeList);
+int getWeightFromEdgeList(struct edge *edgeList, int num_of_edges, int startingNode, int endingNode);
 
 int main() {
 	int num_of_cities = 4;
@@ -58,10 +59,6 @@ int main() {
 	struct edge *city_edge;
 	city_edge = malloc(sizeof(struct edge) * num_of_edges);
 
-	// Struct that stores the MST as a weighted edge list
-	// struct edge *mst_edge;
-	// mst_edge = malloc(sizeof(struct edge) * num_of_edges);
-
 	//Weighted adjacency Matix
 	int i;
 	int **mst_adj_matrix = malloc(sizeof(int *) * num_of_cities);
@@ -75,7 +72,7 @@ int main() {
 	//Find MST by using Prim's algorithm
 	double total_weight = find_MST(num_of_cities, city_edge, mst_adj_matrix, num_of_edges);
 	printf("MST weight = %.0f\n", total_weight);
-	// PrintAdjMatrix(mst_adj_matrix, num_of_cities); // For debugging
+	PrintAdjMatrix(mst_adj_matrix, num_of_cities); // For debugging
 
 	//Init the construct that keeps track of the DFS path
 	int *dfsPath = (int *)malloc(num_of_edges * sizeof(int));
@@ -89,12 +86,95 @@ int main() {
 		printf("path: %d\n", dfsPath[i]);
 	}
 
+	// Write out the approximate optimal path length
+	int finalTspPathLength = calculatePathLength(dfsPath, num_of_edges, mst_adj_matrix, num_of_cities, city_edge);
+	printf("final path length: %d\n", finalTspPathLength);
+
+	// Free all dynamic data structures
 	for (i = 0; i < num_of_cities; i++) {
 		free(mst_adj_matrix[i]);
 	}
 	free(mst_adj_matrix);
 	free(dfsVisited);
 	free(dfsPath);
+	free(city_edge);
+
+	return 0;
+}
+
+int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, int num_of_cities, struct edge *edgeList)
+{
+	int i, startingNode, endingNode;
+	int numberOfNodesInPath = 0;
+	int currentTotalEdgeWeight = 0;
+	int currentEdgeWeight;
+
+	// Find number of nodes in dfs path
+	for (i = 0; i < num_of_edges; ++i)
+	{
+		if (dfsPath[i] != -1)
+		{
+			numberOfNodesInPath++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	for (i = 0; i < numberOfNodesInPath; ++i)
+	{
+		if (i == numberOfNodesInPath - 2)
+		{
+			// End of the path, exit
+			break;
+		}
+		else
+		{
+			startingNode = dfsPath[i];
+			endingNode = dfsPath[i + 1];
+		}
+
+		currentEdgeWeight = mst_adj_matrix[startingNode][endingNode];
+
+		if (currentEdgeWeight == 0)
+		{
+			// Need to find it in the edge list
+			currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, startingNode, endingNode);
+		}
+		currentTotalEdgeWeight += currentEdgeWeight;
+
+		printf("curr w: %d\n", currentEdgeWeight);
+	}
+
+	// Find the edge for the second to last node in the path to the last node in the path
+	currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, dfsPath[numberOfNodesInPath - 2], dfsPath[numberOfNodesInPath - 1]);
+	printf("curr w: %d\n", currentEdgeWeight);
+
+	currentTotalEdgeWeight += currentEdgeWeight;
+
+	// for (i = 0; i < num_of_edges; i++) {
+	// 	printf("Edge between %d and %d, W: %.0f\n", edgeList[i].i_id, edgeList[i].j_id, edgeList[i].weight);
+	// }
+
+	return currentTotalEdgeWeight;
+}
+
+int getWeightFromEdgeList(struct edge *edgeList, int num_of_edges, int startingNode, int endingNode)
+{
+	int i;
+	for (i = 0; i < num_of_edges; i++)
+	{
+		if (edgeList[i].i_id == startingNode && edgeList[i].j_id == endingNode)
+		{
+			return round(edgeList[i].weight);
+		}
+
+		if (edgeList[i].j_id == startingNode && edgeList[i].i_id == endingNode)
+		{
+			return round(edgeList[i].weight);
+		}
+	}
 
 	return 0;
 }
@@ -155,7 +235,6 @@ void PrintAdjMatrix(int **mst_adj_matrix, int num_of_cities)
 }
 
 //Find MST using Prim's Algorithm
-// double find_MST(int num_of_cities, struct edge *city_edge, struct edge *mst_edge, int num_of_edges) {
 double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix, int num_of_edges) {
 	int *comps, i, j, k, cj, l;
 	int total_distance = 0;
@@ -173,11 +252,9 @@ double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix,
 		if (comps[i] != comps[j]) {
 			total_distance += city_edge[k].weight;
 
-			// Add the edge to the MST edge list
-			// mst_edge[k].i_id = city_edge[k].i_id;
-			// mst_edge[k].j_id = city_edge[k].j_id;
-			// mst_edge[k].weight = city_edge[k].weight;
-			mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = city_edge[k].weight;
+			// Add the edges to the adjacency matrix
+			mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = round(city_edge[k].weight);
+			mst_adj_matrix[city_edge[k].j_id][city_edge[k].i_id] = round(city_edge[k].weight);
 
 			// printf("Added: Edge between %d and %d, W: %.0f\n", city_edge[k].i_id, city_edge[k].j_id, city_edge[k].weight);
 
@@ -198,7 +275,7 @@ double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix,
 	// }
 
 	free(comps);
-	free(city_edge);
+	// free(city_edge); // Freed in main
 	return total_distance;
 }
 
