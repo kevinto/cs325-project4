@@ -12,20 +12,14 @@
 #include "filefunctions.h"
 #include <math.h>
 
-struct city {
-	int id;
-	int x;
-	int y;
-};
-
 struct edge {
 	int i_id;
 	int j_id;
 	double weight;
 };
 
-void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName);
-void find_distance(struct city cities[], int num_of_cities, struct edge *city_edge, int num_of_edges);
+void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements, char *inputFileName);
+void find_distance(struct city *cities, int num_of_cities, struct edge *city_edge, int num_of_edges);
 double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix, int num_of_edges);
 int cmp_weights(const void *a, const void *b);
 void PrintAdjMatrix(int **mst_adj_matrix, int num_of_cities);
@@ -82,7 +76,7 @@ int main(int argc, char *argv[])
 		// For debug only
 		// display2DIntArray(cityArray, numberOfLines, numberOfElements);
 
-		executeAlgorithm(cityArray, numberOfLines, inputFileName);
+		executeAlgorithm(cityArray, numberOfLines, numberOfElements, inputFileName);
 
 		// Free dynamic arrays
 		for (i = 0; i < numberOfLines; i++)
@@ -110,8 +104,33 @@ int main(int argc, char *argv[])
  * *  has three columns.
  * *
  * ***************************************************************/
-void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
+void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements, char *inputFileName)
 {
+	int i;
+
+//********************************************************************************
+//Matt's portion	
+	// Init dynamic array to hold the values from the test file. The format
+	// of the dynamic array is an array of struct city. Each struct in the
+	// array contains:
+	// id = city identifier (this is an integer)
+	// x = x coordinate (integer)
+	// y = y coordinate (integer)
+
+	struct city *cities = (struct city *)malloc(numberOfCities * sizeof(struct city));
+	// Put test file values into the array
+	for (i = 0; i < numberOfCities; i++)
+	{
+		cities[i].id = cityArray[i][0];
+		cities[i].x = cityArray[i][1];
+		cities[i].y = cityArray[i][2];
+		//fillCities(inputFileName, i, citiesArray, numberOfElements);
+	}
+	//debug purposes only
+	displayCityArray(cities, numberOfCities);
+//********************************************************************************
+
+	
 	// Create a dynamic array to hold the results, numberOfCities+1
 	int resultArraySize = numberOfCities + 1;
 	int *resultArray = (int *)malloc(resultArraySize * sizeof(int));
@@ -125,10 +144,10 @@ void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
 	// pushIntResult(testint1, resultArray, resultArraySize);
 
 //!!!!!
-	int num_of_cities = 4;
+	int num_of_cities = numberOfCities;
 	int num_of_edges = num_of_cities * (num_of_cities) / 2;
 
-	//INITIALIZE DUMMY DATA UNTIL MATT'S PROVIDES DATA
+/*	//INITIALIZE DUMMY DATA UNTIL MATT'S PROVIDES DATA
 	struct city cities[num_of_cities];
 	cities[0].id = 0;
 	cities[0].x = 200;
@@ -145,14 +164,13 @@ void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
 	cities[3].id = 3;
 	cities[3].x = 4700;
 	cities[3].y = 5750;
-
+*/
 
 	//Struct that stores 2 cities and the weight of their edge
 	struct edge *city_edge;
 	city_edge = malloc(sizeof(struct edge) * num_of_edges);
 
 	//Weighted adjacency Matix
-	int i;
 	int **mst_adj_matrix = malloc(sizeof(int *) * num_of_cities);
 	for (i = 0; i < num_of_cities; i++) {
 		mst_adj_matrix[i] = (int *)malloc(num_of_cities * sizeof(int));
@@ -184,7 +202,7 @@ void executeAlgorithm(int **cityArray, int numberOfCities, char *inputFileName)
 	// printf("final path length: %d\n", finalTspPathLength);
 
 	// Put approximate "optimal" path into result array
-	for (int i = 0; i < num_of_cities; ++i)
+	for (i = 0; i < num_of_cities; ++i)
 	{
 		pushIntResult(dfsPath[i], resultArray, resultArraySize);
 	}
@@ -400,7 +418,7 @@ int cmp_weights(const void *a, const void *b) {
 }
 
 //Find distance between each city and stored in struct
-void find_distance(struct city cities[], int num_of_cities, struct edge *city_edge, int num_of_edges) {
+void find_distance(struct city *cities, int num_of_cities, struct edge *city_edge, int num_of_edges) {
 //  struct edge city_edge[num_of_edges];
 	int i, j, h = 0;
 	double weight;

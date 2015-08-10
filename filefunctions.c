@@ -95,20 +95,20 @@ void fillCities(char *inputFileName, int inputLineNumber, struct city *inputCity
 		
 		if (count >= numberOfElements)
 		{
-			// printf("inputLineNumber: %d\n", inputLineNumber);
-			// printf("Error (fillIntArray): Accessing out of bounds index in array\n");
+			printf("inputLineNumber: %d\n", inputLineNumber);
+			printf("Error (fillIntArray): Accessing out of bounds index in array\n");
 			break;
 		}
 
-		if (count == 0) {
-			inputCity->id = currentNumber;
+		else if (count == 0) {
+			inputCity[inputLineNumber].id = currentNumber;
 			
 		}
 		else if (count == 1) {
-			inputCity->x = currentNumber;
+			inputCity[inputLineNumber].x = currentNumber;
 		}
-		else {//(count == 2)
-			inputCity->y = currentNumber;
+		else if (count == 2) {
+			inputCity[inputLineNumber].y = currentNumber;
 		}
 		
 		count++;
@@ -406,6 +406,7 @@ void displayCityArray(struct city *cities, int rows)
 	{
 		printf("%d %d %d\n", cities[i].id, cities[i].x, cities[i].y);
 	}
+	printf("\n");
 }
 
 void pushIntResult(int value, int *arrayToPushTo, int arraySize)
