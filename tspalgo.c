@@ -2,7 +2,8 @@
  * *  Filename: tspalgo.c
  * *  Coded by: Group 2
  * *  Purpose - This file implements the algorithm for the TSP
- * *			problem.
+ * *			problem. We decided to implement an appoximation
+ * *			algorithm.
  * *
  * ***************************************************************/
 
@@ -18,6 +19,7 @@ struct edge {
 	double weight;
 };
 
+// Function Definitions
 void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements, char *inputFileName);
 void find_distance(struct city *cities, int num_of_cities, struct edge *city_edge, int num_of_edges);
 double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix, int num_of_edges);
@@ -72,7 +74,6 @@ int main(int argc, char *argv[])
 		{
 			fillIntArray(inputFileName, i, cityArray[i], numberOfElements);
 		}
-
 		// For debug only
 		// display2DIntArray(cityArray, numberOfLines, numberOfElements);
 
@@ -91,9 +92,9 @@ int main(int argc, char *argv[])
 
 /**************************************************************
  * * Entry:
- * *  inputArray - The input array containing the coin denominations.
- * *  numberOfElements - The number of elements in the array.
- * *  changeAmount - The change amount.
+ * *  cityArray - The array containing all the cities.
+ * *  numberOfCities - The number of the cities in the array above.
+ * *  numberOfElements - DEPRECEATED. Needs to be removed in next refactoring
  * *  inputFileName - The input file name.
  * *
  * * Exit:
@@ -108,15 +109,12 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 {
 	int i;
 
-//********************************************************************************
-//Matt's portion
 	// Init dynamic array to hold the values from the test file. The format
 	// of the dynamic array is an array of struct city. Each struct in the
 	// array contains:
 	// id = city identifier (this is an integer)
 	// x = x coordinate (integer)
 	// y = y coordinate (integer)
-
 	struct city *cities = (struct city *)malloc(numberOfCities * sizeof(struct city));
 	// Put test file values into the array
 	for (i = 0; i < numberOfCities; i++)
@@ -124,73 +122,54 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 		cities[i].id = cityArray[i][0];
 		cities[i].x = cityArray[i][1];
 		cities[i].y = cityArray[i][2];
-		//fillCities(inputFileName, i, citiesArray, numberOfElements);
 	}
 	//debug purposes only
 	// displayCityArray(cities, numberOfCities);
-//********************************************************************************
 
-
-	// Create a dynamic array to hold the results, numberOfCities+1
+	// Create a dynamic array to hold the results, numberOfCities+1. The first line
+	// will be the the path length and the following lines will be the path traversal
+	// sequence
 	int resultArraySize = numberOfCities + 1;
 	int *resultArray = (int *)malloc(resultArraySize * sizeof(int));
 	resetArrays(resultArray, resultArraySize);
 
-//!!!!!
 	int num_of_cities = numberOfCities;
 	int num_of_edges = num_of_cities * (num_of_cities) / 2;
 
-	/*	//INITIALIZE DUMMY DATA UNTIL MATT'S PROVIDES DATA
-		struct city cities[num_of_cities];
-		cities[0].id = 0;
-		cities[0].x = 200;
-		cities[0].y = 800;
-
-		cities[1].id = 1;
-		cities[1].x = 3600;
-		cities[1].y = 2300;
-
-		cities[2].id = 2;
-		cities[2].x = 3100;
-		cities[2].y = 3300;
-
-		cities[3].id = 3;
-		cities[3].x = 4700;
-		cities[3].y = 5750;
-	*/
-
-	//Struct that stores 2 cities and the weight of their edge
+	// Struct that stores 2 cities and the weight of their edge
 	struct edge *city_edge;
 	city_edge = malloc(sizeof(struct edge) * num_of_edges);
 
-	//Weighted adjacency Matix
+	// Init weighted adjacency matix
 	int **mst_adj_matrix = malloc(sizeof(int *) * num_of_cities);
 	for (i = 0; i < num_of_cities; i++) {
 		mst_adj_matrix[i] = (int *)malloc(num_of_cities * sizeof(int));
 	}
 
-	//Find distance between each city & store in struct
+	//Find distance between each city & store in array of city structs 
 	find_distance(cities, num_of_cities, city_edge, num_of_edges);
 
-	//Find MST by using Prim's algorithm
+	// Find MST by using Prim's algorithm and store MST in adj matrix
 	double total_weight = find_MST(num_of_cities, city_edge, mst_adj_matrix, num_of_edges);
-	// printf("MST weight = %.0f\n", total_weight);
+	// printf("MST weight = %.0f\n", total_weight); // For debugging
 	// PrintAdjMatrix(mst_adj_matrix, num_of_cities); // For debugging
 
-	//Init the construct that keeps track of the DFS path
+	// Init the construct that keeps track of the DFS path
 	int *dfsPath = (int *)malloc(num_of_edges * sizeof(int));
 	setArrToNegOne(dfsPath, num_of_edges);
 
-	//Run DFS, keeping track of the path and the total length
+	// Init visited array for DFS to track the next node to traverse to.
 	int *dfsVisited = (int *)malloc(num_of_cities * sizeof(int));
 	for (int i = 0; i < num_of_cities; ++i)
 	{
 		dfsVisited[i] = 0;
 	}
-	DFS(0, dfsVisited, mst_adj_matrix, num_of_cities, dfsPath, num_of_edges);
-	addToPath(dfsPath, num_of_edges, 0); // Add the last city to travel to
 
-	// Write out the approximate optimal path length
+	// Run DFS, keeping track of the path and the total length
+	DFS(0, dfsVisited, mst_adj_matrix, num_of_cities, dfsPath, num_of_edges);
+	addToPath(dfsPath, num_of_edges, 0); // Add the last city to travel. This city is the first city in the path 
+
+	// Write out the approximate optimal path length to the result array
 	int finalTspPathLength = calculatePathLength(dfsPath, num_of_edges, mst_adj_matrix, num_of_cities, city_edge);
 	pushIntResult(finalTspPathLength, resultArray, resultArraySize);
 	// printf("final path length: %d\n", finalTspPathLength);
@@ -201,11 +180,10 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 		// printf("visited: %d\n", dfsVisited[i]);
 		pushIntResult(dfsPath[i], resultArray, resultArraySize);
 	}
-
 	// For debugging
 	// displayIntArray(resultArray, resultArraySize);
 
-	// Create a method to output the resulting array to a file
+	// Output the result array to the result file
 	outputResultToFile(resultArray, resultArraySize, inputFileName);
 
 	// Free all dynamic data structures
@@ -219,6 +197,7 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 	free(resultArray);
 }
 
+// Calculate the length of the given path
 int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, int num_of_cities, struct edge *edgeList)
 {
 	int i, startingNode, endingNode;
@@ -239,26 +218,33 @@ int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, i
 		}
 	}
 
+	// Find the sum of all the nodes in the path
 	for (i = 0; i < numberOfNodesInPath; ++i)
 	{
 		if (i == numberOfNodesInPath - 2)
 		{
-			// End of the path, exit
+			// End of the path, exit.
+			// We are exiting at the second to list node because
+			// we are adding the distance by edges.
 			break;
 		}
 		else
 		{
+			// Get the start and end nodes of the edge
 			startingNode = dfsPath[i];
 			endingNode = dfsPath[i + 1];
 		}
 
 		if (mst_adj_matrix[startingNode][endingNode] == -2)
 		{
-			// Take care of the case where two cities have the same coordinates
+			// Take care of the case where two cities have the same coordinates. 
+			// Here two cities are on the same coordinates, so their weight will
+			// be 0
 			currentEdgeWeight = 0;
 		}
 		else
 		{
+			// Get the weight of the current edge
 			currentEdgeWeight = mst_adj_matrix[startingNode][endingNode];
 		}
 
@@ -266,20 +252,18 @@ int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, i
 		// question are not on the same coordinates
 		if (currentEdgeWeight == 0 && !(mst_adj_matrix[startingNode][endingNode] == -2))
 		{
-			// Need to find it in the edge list
+			// Find weight in the edge list
 			currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, startingNode, endingNode);
 		}
 		currentTotalEdgeWeight += currentEdgeWeight;
-
-		// printf("curr w: %d\n", currentEdgeWeight);
 	}
 
 	// Find the edge for the second to last node in the path to the last node in the path
 	currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, dfsPath[numberOfNodesInPath - 2], dfsPath[numberOfNodesInPath - 1]);
-	// printf("curr w: %d\n", currentEdgeWeight);
 
 	currentTotalEdgeWeight += currentEdgeWeight;
 
+	// For debugging
 	// for (i = 0; i < num_of_edges; i++) {
 	// 	printf("Edge between %d and %d, W: %.0f\n", edgeList[i].i_id, edgeList[i].j_id, edgeList[i].weight);
 	// }
@@ -287,6 +271,7 @@ int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, i
 	return currentTotalEdgeWeight;
 }
 
+// Gets the weight from the edge list containing a list of all the edges
 int getWeightFromEdgeList(struct edge *edgeList, int num_of_edges, int startingNode, int endingNode)
 {
 	int i;
@@ -306,6 +291,7 @@ int getWeightFromEdgeList(struct edge *edgeList, int num_of_edges, int startingN
 	return 0;
 }
 
+// Perform a depth first search. Reasoning behind using DFS to solve TSP is given in the associated report
 void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *dfsPath, int pathSize)
 {
 	int j, i;
@@ -321,11 +307,13 @@ void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *
 
 		// Here the -2 means that the two nodes are on the same coordinates
 		if (!visited[j] && (adjMatrix[sourceNode][j] > 0 || adjMatrix[sourceNode][j] == -2)) {
+			// Traverse to an adjacent node
 			DFS(j, visited, adjMatrix, num_of_cities, dfsPath, pathSize);
 		}
 	}
 }
 
+// Adds a node to the an array tracking the traversal sequence
 void addToPath(int *dfsPath, int pathSize, int sourceNode)
 {
 	int i;
@@ -339,6 +327,7 @@ void addToPath(int *dfsPath, int pathSize, int sourceNode)
 	}
 }
 
+// Sets all elements in an array to -1
 void setArrToNegOne(int *array, int arraySize) {
 	int i;
 	for (i = 0; i < arraySize; ++i)
@@ -347,6 +336,7 @@ void setArrToNegOne(int *array, int arraySize) {
 	}
 }
 
+// For debugging. Prints the adjacency matrix
 void PrintAdjMatrix(int **mst_adj_matrix, int num_of_cities)
 {
 	int i, j;
@@ -363,6 +353,11 @@ void PrintAdjMatrix(int **mst_adj_matrix, int num_of_cities)
 
 //Find MST using Prim's Algorithm
 double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix, int num_of_edges) {
+	// NOTE: Before this method was called another method was invoked which populated city_edge. 
+	// 		 city_edge was also sorted by weight in increasing order. This always needs be done
+	//		 before this current method is invoked. This is to always maintain that the next edge
+	//		 to be processed is the edge with the least cost.
+
 	int *comps, i, j, k, cj, l;
 	int total_distance = 0;
 
@@ -372,10 +367,12 @@ double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix,
 		comps[i] = i;
 	}
 
+	// Loops through all edges
 	for (k = 0; k < num_of_edges; k++) {
 		i = city_edge[k].i_id;
 		j = city_edge[k].j_id;
 
+		// If we havent processed the current edge yet
 		if (comps[i] != comps[j]) {
 			total_distance += city_edge[k].weight;
 
@@ -383,17 +380,11 @@ double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix,
 			mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = round(city_edge[k].weight);
 			mst_adj_matrix[city_edge[k].j_id][city_edge[k].i_id] = round(city_edge[k].weight);
 
-			// Take care of the case where the cities could be at the same coordinates
-			// if (city_edge[k].j_id == 172 || city_edge[k].i_id == 172)
-			// {
-			// 	printf("Added: Edge between %d and %d, W: %.0f\n", city_edge[k].i_id, city_edge[k].j_id, city_edge[k].weight);
-			// }
 			if (city_edge[k].weight == 0)
 			{
 				// Here -2 means the cities have the same coordinates
 				mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = -2;
 				mst_adj_matrix[city_edge[k].j_id][city_edge[k].i_id] = -2;
-				// printf("Added a 0 weight to the adj matrix\n");
 			}
 
 			cj = comps[j];
@@ -432,7 +423,7 @@ int cmp_weights(const void *a, const void *b) {
 		return 1;
 }
 
-//Find distance between each city and stored in struct
+//Find distance between each city and store in struct
 void find_distance(struct city *cities, int num_of_cities, struct edge *city_edge, int num_of_edges) {
 //  struct edge city_edge[num_of_edges];
 	int i, j, h = 0;
