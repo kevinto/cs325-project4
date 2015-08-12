@@ -198,9 +198,9 @@ void executeAlgorithm(int **cityArray, int numberOfCities, int numberOfElements,
 	// Put approximate "optimal" path into result array
 	for (i = 0; i < num_of_cities; ++i)
 	{
+		// printf("visited: %d\n", dfsVisited[i]);
 		pushIntResult(dfsPath[i], resultArray, resultArraySize);
 	}
-//!!!!!
 
 	// For debugging
 	// displayIntArray(resultArray, resultArraySize);
@@ -252,9 +252,19 @@ int calculatePathLength(int *dfsPath, int num_of_edges,  int **mst_adj_matrix, i
 			endingNode = dfsPath[i + 1];
 		}
 
-		currentEdgeWeight = mst_adj_matrix[startingNode][endingNode];
+		if (mst_adj_matrix[startingNode][endingNode] == -2)
+		{
+			// Take care of the case where two cities have the same coordinates
+			currentEdgeWeight = 0;
+		}
+		else
+		{
+			currentEdgeWeight = mst_adj_matrix[startingNode][endingNode];
+		}
 
-		if (currentEdgeWeight == 0)
+		// Only find in edge list if the edge is not the MST and if the two nodes in 
+		// question are not on the same coordinates
+		if (currentEdgeWeight == 0 && !(mst_adj_matrix[startingNode][endingNode] == -2))
 		{
 			// Need to find it in the edge list
 			currentEdgeWeight = getWeightFromEdgeList(edgeList, num_of_edges, startingNode, endingNode);
@@ -301,8 +311,7 @@ void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *
 	int j, i;
 	visited[sourceNode] = 1;
 	addToPath(dfsPath, pathSize, sourceNode);
-	// printf("path: %d\n", sourceNode);
-
+	
 	for (j = 0; j < num_of_cities; j++) {
 		if (sourceNode >= num_of_cities || j >= num_of_cities)
 		{
@@ -310,7 +319,8 @@ void DFS(int sourceNode, int *visited, int **adjMatrix, int num_of_cities, int *
 			return;
 		}
 
-		if (!visited[j] && adjMatrix[sourceNode][j] > 0) {
+		// Here the -2 means that the two nodes are on the same coordinates
+		if (!visited[j] && (adjMatrix[sourceNode][j] > 0 || adjMatrix[sourceNode][j] == -2)) {
 			DFS(j, visited, adjMatrix, num_of_cities, dfsPath, pathSize);
 		}
 	}
@@ -373,7 +383,18 @@ double find_MST(int num_of_cities, struct edge *city_edge, int **mst_adj_matrix,
 			mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = round(city_edge[k].weight);
 			mst_adj_matrix[city_edge[k].j_id][city_edge[k].i_id] = round(city_edge[k].weight);
 
-			// printf("Added: Edge between %d and %d, W: %.0f\n", city_edge[k].i_id, city_edge[k].j_id, city_edge[k].weight);
+			// Take care of the case where the cities could be at the same coordinates
+			// if (city_edge[k].j_id == 172 || city_edge[k].i_id == 172)
+			// {
+			// 	printf("Added: Edge between %d and %d, W: %.0f\n", city_edge[k].i_id, city_edge[k].j_id, city_edge[k].weight);
+			// }
+			if (city_edge[k].weight == 0)
+			{
+				// Here -2 means the cities have the same coordinates
+				mst_adj_matrix[city_edge[k].i_id][city_edge[k].j_id] = -2;
+				mst_adj_matrix[city_edge[k].j_id][city_edge[k].i_id] = -2;
+				// printf("Added a 0 weight to the adj matrix\n");
+			}
 
 			cj = comps[j];
 
